@@ -14,7 +14,7 @@ module.exports = createRule({
     type: "suggestion",
     messages: {
       missingMerge: "Missing merge option parameter.",
-      addOptionParameterMergeTrue: "Add radix parameter { merge: true }.",
+      addOptionParameterMergeTrue: "Add option parameter { merge: true }.",
     },
     schema: [],
   },
@@ -64,11 +64,14 @@ module.exports = createRule({
     }
     return {
       CallExpression: (node) => {
-        if (!checkSet(node) && !checkSetDoc(node)) {
+        const isSet = checkSet(node);
+        const isSetDoc = checkSetDoc(node);
+        if (!isSet && !isSetDoc) {
           return;
         }
 
-        if (node.arguments.length <= 1) {
+        const mergeIndex = isSet ? 1 : 2
+        if (node.arguments.length <= mergeIndex) {
           context.report({
             messageId: "missingMerge",
             node,
@@ -76,7 +79,7 @@ module.exports = createRule({
           });
           return;
         }
-        const argument = node.arguments[1] as any;
+        const argument = node.arguments[mergeIndex] as any;
         const haveMergeTrue = argument.properties.some(
           ({
             key,

@@ -16,8 +16,8 @@ tester.run(
   {
     valid: [
       { code: "doc().set({}, { merge: true})" },
-      { code: "setDoc(doc(getFirestore(), 'test'), { merge: true})" },
-      { code: "setDoc(doc(getFirestore(), 'test'), { mergeFields: []})" },
+      { code: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'}, { merge: true})" },
+      { code: "setDoc(doc(getFirestore(), 'test'), {content: 'bbbb'}, { mergeFields: []})" },
     ],
     invalid: [
       {
@@ -48,9 +48,9 @@ tester.run(
           },
         ],
       },
-      { code: "setDoc(doc(getFirestore(), 'test'))", errors: [message] },
-      { code: "setDoc(doc(getFirestore(), {merge: 'aaa'}))", errors: [message] },
-      { code: "setDoc(doc(getFirestore(), {mergeFields: true}))", errors: [message] },
+      { code: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'})", errors: [message] },
+      { code: "setDoc(doc(getFirestore(), {content: 'aaa'}, {merge: 'aaa'}))", errors: [message] },
+      { code: "setDoc(doc(getFirestore(), {content: 'aaa'}, {mergeFields: true}))", errors: [message] },
     ],
   }
 );
