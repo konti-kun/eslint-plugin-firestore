@@ -1,7 +1,16 @@
 import { TSESTree } from "@typescript-eslint/utils";
 import { createRule } from "./utils/createRule";
 import { getPropertyName } from "eslint-ast-utils";
-import { ReportSuggestionArray, RuleFixer } from "@typescript-eslint/utils/dist/ts-eslint";
+import {
+  ReportSuggestionArray,
+  RuleFixer,
+} from "@typescript-eslint/utils/dist/ts-eslint";
+
+const messages = {
+  missingMerge: "Missing merge option parameter.",
+  addOptionParameterMergeTrue: "Add option parameter { merge: true }.",
+  changeUpdate: "Change from set to update.",
+};
 
 module.exports = createRule({
   name: "firestore-set-required-merge",
@@ -13,16 +22,14 @@ module.exports = createRule({
     },
     hasSuggestions: true,
     type: "suggestion",
-    messages: {
-      missingMerge: "Missing merge option parameter.",
-      addOptionParameterMergeTrue: "Add option parameter { merge: true }.",
-      changeUpdate: "Change from set to update.",
-    },
+    messages,
     schema: [],
   },
   defaultOptions: [],
   create(context) {
-    const generateSuggest = (node: TSESTree.CallExpression):ReportSuggestionArray<'missingMerge' | 'addOptionParameterMergeTrue' | 'changeUpdate'> => [
+    const generateSuggest = (
+      node: TSESTree.CallExpression
+    ): ReportSuggestionArray<keyof typeof messages> => [
       {
         messageId: "addOptionParameterMergeTrue",
         fix(fixer: RuleFixer) {
@@ -49,14 +56,12 @@ module.exports = createRule({
           const setDocIndex = tokens.findIndex(
             (token) => token.value === "setDoc"
           );
-          if(setDocIndex >= 0) {
-            return fixer.replaceText(tokens[setDocIndex], 'updateDoc');
+          if (setDocIndex >= 0) {
+            return fixer.replaceText(tokens[setDocIndex], "updateDoc");
           }
-          const setIndex = tokens.findIndex(
-            (token) => token.value === "set"
-          );
-          if(setIndex >=0) {
-            return fixer.replaceText(tokens[setIndex], 'update');
+          const setIndex = tokens.findIndex((token) => token.value === "set");
+          if (setIndex >= 0) {
+            return fixer.replaceText(tokens[setIndex], "update");
           }
           return null;
         },
