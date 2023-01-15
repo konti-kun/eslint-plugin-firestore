@@ -16,8 +16,12 @@ tester.run(
   {
     valid: [
       { code: "doc().set({}, { merge: true})" },
-      { code: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'}, { merge: true})" },
-      { code: "setDoc(doc(getFirestore(), 'test'), {content: 'bbbb'}, { mergeFields: []})" },
+      {
+        code: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'}, { merge: true})",
+      },
+      {
+        code: "setDoc(doc(getFirestore(), 'test'), {content: 'bbbb'}, { mergeFields: []})",
+      },
     ],
     invalid: [
       {
@@ -29,6 +33,10 @@ tester.run(
               {
                 messageId: "addOptionParameterMergeTrue",
                 output: "doc().set({}, { merge: true });",
+              },
+              {
+                messageId: "changeUpdate",
+                output: "doc().update({});",
               },
             ],
           },
@@ -44,13 +52,40 @@ tester.run(
                 messageId: "addOptionParameterMergeTrue",
                 output: "doc().set({}, { merge: true });",
               },
+              {
+                messageId: "changeUpdate",
+                output: "doc().update({},);",
+              },
             ],
           },
         ],
       },
-      { code: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'})", errors: [message] },
-      { code: "setDoc(doc(getFirestore(), {content: 'aaa'}, {merge: 'aaa'}))", errors: [message] },
-      { code: "setDoc(doc(getFirestore(), {content: 'aaa'}, {mergeFields: true}))", errors: [message] },
+      {
+        code: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'})",
+        errors: [
+          {
+            messageId: "missingMerge",
+            suggestions: [
+              {
+                messageId: "addOptionParameterMergeTrue",
+                output: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'}, { merge: true })",
+              },
+              {
+                messageId: "changeUpdate",
+                output: "updateDoc(doc(getFirestore(), 'test'), {content: 'aaa'})",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        code: "setDoc(doc(getFirestore(), {content: 'aaa'}, {merge: 'aaa'}))",
+        errors: [message],
+      },
+      {
+        code: "setDoc(doc(getFirestore(), {content: 'aaa'}, {mergeFields: true}))",
+        errors: [message],
+      },
     ],
   }
 );

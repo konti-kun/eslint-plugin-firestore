@@ -1,6 +1,7 @@
 import { TSESTree } from "@typescript-eslint/utils";
 import { createRule } from "./utils/createRule";
 import { getPropertyName } from "eslint-ast-utils";
+import { ReportSuggestionArray, RuleFixer } from "@typescript-eslint/utils/dist/ts-eslint";
 
 module.exports = createRule({
   name: "firestore-set-required-merge",
@@ -15,15 +16,16 @@ module.exports = createRule({
     messages: {
       missingMerge: "Missing merge option parameter.",
       addOptionParameterMergeTrue: "Add option parameter { merge: true }.",
+      changeUpdate: "Change from set to update.",
     },
     schema: [],
   },
   defaultOptions: [],
   create(context) {
-    const generateSuggest = (node: TSESTree.CallExpression) => [
+    const generateSuggest = (node: TSESTree.CallExpression):ReportSuggestionArray<'missingMerge' | 'addOptionParameterMergeTrue' | 'changeUpdate'> => [
       {
         messageId: "addOptionParameterMergeTrue",
-        fix(fixer: any) {
+        fix(fixer: RuleFixer) {
           const sourceCode = context.getSourceCode();
           const tokens = sourceCode.getTokens(node);
           const lastToken = tokens[tokens.length - 1];
@@ -37,7 +39,28 @@ module.exports = createRule({
             hasTrailingComma ? " { merge: true }" : ", { merge: true }"
           );
         },
-      } as any,
+      },
+      {
+        messageId: "changeUpdate",
+        fix(fixer: RuleFixer) {
+          const sourceCode = context.getSourceCode();
+          const tokens = sourceCode.getTokens(node);
+
+          const setDocIndex = tokens.findIndex(
+            (token) => token.value === "setDoc"
+          );
+          if(setDocIndex >= 0) {
+            return fixer.replaceText(tokens[setDocIndex], 'updateDoc');
+          }
+          const setIndex = tokens.findIndex(
+            (token) => token.value === "set"
+          );
+          if(setIndex >=0) {
+            return fixer.replaceText(tokens[setIndex], 'update');
+          }
+          return null;
+        },
+      },
     ];
 
     function checkSetDoc(node: TSESTree.CallExpression): boolean {
@@ -70,7 +93,7 @@ module.exports = createRule({
           return;
         }
 
-        const mergeIndex = isSet ? 1 : 2
+        const mergeIndex = isSet ? 1 : 2;
         if (node.arguments.length <= mergeIndex) {
           context.report({
             messageId: "missingMerge",
