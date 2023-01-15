@@ -2,6 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const createRule_1 = require("./utils/createRule");
 const eslint_ast_utils_1 = require("eslint-ast-utils");
+const messages = {
+    missingMerge: "Missing merge option parameter.",
+    addOptionParameterMergeTrue: "Add option parameter { merge: true }.",
+    changeUpdate: "Change from set to update.",
+};
 module.exports = (0, createRule_1.createRule)({
     name: "firestore-set-required-merge",
     meta: {
@@ -11,10 +16,7 @@ module.exports = (0, createRule_1.createRule)({
         },
         hasSuggestions: true,
         type: "suggestion",
-        messages: {
-            missingMerge: "Missing merge option parameter.",
-            addOptionParameterMergeTrue: "Add option parameter { merge: true }.",
-        },
+        messages,
         schema: [],
     },
     defaultOptions: [],
@@ -30,6 +32,22 @@ module.exports = (0, createRule_1.createRule)({
                     const hasTrailingComma = secondToLastToken.type === "Punctuator" &&
                         secondToLastToken.value === ",";
                     return fixer.insertTextBefore(lastToken, hasTrailingComma ? " { merge: true }" : ", { merge: true }");
+                },
+            },
+            {
+                messageId: "changeUpdate",
+                fix(fixer) {
+                    const sourceCode = context.getSourceCode();
+                    const tokens = sourceCode.getTokens(node);
+                    const setDocIndex = tokens.findIndex((token) => token.value === "setDoc");
+                    if (setDocIndex >= 0) {
+                        return fixer.replaceText(tokens[setDocIndex], "updateDoc");
+                    }
+                    const setIndex = tokens.findIndex((token) => token.value === "set");
+                    if (setIndex >= 0) {
+                        return fixer.replaceText(tokens[setIndex], "update");
+                    }
+                    return null;
                 },
             },
         ];
