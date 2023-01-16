@@ -5,7 +5,7 @@ Firestore linting rules for ESLint.
 ## Install
 
 ```
-npm install --save-dev @konti-kun/eslint-plugin-firestore 
+npm install --save-dev @sonicgarden/eslint-plugin-firestore 
 ```
 
 ## Configuration
@@ -15,9 +15,9 @@ npm install --save-dev @konti-kun/eslint-plugin-firestore
 
 ```json
 {
-  plugins: [ "@konti-kun/firestore"],
+  plugins: [ "@sonicgarden/firestore"],
   rules: {
-    "@konti-kun/firestore/firestore-set-require-merge": "warn",
+    "@sonicgarden/firestore/firestore-set-require-merge": "warn",
   },
 }
 ```
