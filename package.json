@@ -8,6 +8,10 @@
     "eslint-plugin",
     "rule"
   ],
+  "homepage": "https://github.com/konti-kun/eslint-plugin-firestore#readme",
+  "bugs": {
+    "url": "https://github.com/konti-kun/eslint-plugin-firestore/issues"
+  },
   "scripts": {
     "test": "jest",
     "build": "tsc --project ./tsconfig.build.json"
