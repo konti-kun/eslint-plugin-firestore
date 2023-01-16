@@ -5,7 +5,7 @@ Firestore linting rules for ESLint.
 ## Install
 
 ```
-npm install --save-dev eslint-plugin-firestore 
+npm install --save-dev @konti-kun/eslint-plugin-firestore 
 ```
 
 ## Configuration
