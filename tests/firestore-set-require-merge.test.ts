@@ -16,6 +16,7 @@ tester.run(
   {
     valid: [
       { code: "doc().set({}, { merge: true})" },
+      { code: "collection().doc().set({}, { merge: true})" },
       {
         code: "setDoc(doc(getFirestore(), 'test'), {content: 'aaa'}, { merge: true})",
       },

@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-firestore",
+  "name": "@konti-kun/eslint-plugin-firestore",
   "version": "1.0.0",
   "description": "ESLint rule for Firestore.",
   "keywords": [

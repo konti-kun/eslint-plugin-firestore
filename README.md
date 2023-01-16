@@ -14,11 +14,10 @@ npm install --save-dev eslint-plugin-firestore
 2. Enable rules.
 
 ```json
-// .eslintrc.js
 {
-  plugins: [ "firestore"],
+  plugins: [ "@konti-kun/firestore"],
   rules: {
-    "firestore/firestore-set-require-merge": "warn",
+    "@konti-kun/firestore/firestore-set-require-merge": "warn",
   },
 }
 ```
