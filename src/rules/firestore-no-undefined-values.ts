@@ -59,18 +59,27 @@ module.exports = createRule<[RuleOptions?], "noUndefinedValues">({
           return false;
         }
 
-        // If additionalObjects is specified, check if the object matches
+        const object = callee.object;
+
+        // If additionalObjects is specified, only check those specific objects
         if (additionalObjects.length > 0) {
-          const object = callee.object;
           if (object.type === "Identifier") {
             return additionalObjects.includes(object.name);
           }
-          // Also support chained calls like doc().set()
+          // If additionalObjects is specified but this is a chained call,
+          // don't check it (it will be checked without additionalObjects)
+          return false;
+        }
+
+        // Default behavior when additionalObjects is not specified:
+        // Only check chained method calls like doc().set(), not simple identifiers
+        if (object.type === "CallExpression") {
           return true;
         }
 
-        // Default behavior: allow all method calls with set/update/create
-        return true;
+        // Don't check simple identifier objects when additionalObjects is not specified
+        // (e.g., batch.set() will be ignored unless "batch" is in additionalObjects)
+        return false;
       }
 
       return false;
@@ -88,7 +97,25 @@ module.exports = createRule<[RuleOptions?], "noUndefinedValues">({
         return 1;
       }
 
-      // For method calls (set, update, create), data is the first argument (index 0)
+      // For method calls on custom objects (batch, transaction, etc.)
+      if (callee.type === "MemberExpression") {
+        const object = callee.object;
+        // Check if it's a call on an additional object (e.g., batch.set())
+        if (object.type === "Identifier" && additionalObjects.includes(object.name)) {
+          // If there are 2 or more arguments, data is the second argument (index 1)
+          // e.g., batch.set(objectRef, { data })
+          // If there's only 1 argument, data is the first argument (index 0)
+          // e.g., transaction.set({ data })
+          return node.arguments.length >= 2 ? 1 : 0;
+        }
+        // For chained calls like doc().set(), collection().doc().create()
+        // data is the first argument (index 0)
+        if (object.type === "CallExpression") {
+          return 0;
+        }
+      }
+
+      // Default: data is the first argument (index 0)
       return 0;
     }
 

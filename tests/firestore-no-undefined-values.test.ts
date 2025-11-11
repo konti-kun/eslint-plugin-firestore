@@ -23,31 +23,35 @@ tester.run(
       { code: "updateDoc(doc(getFirestore(), 'test'), { content: 'aaa' })" },
 
       // create with valid values (addDoc)
-      { code: "addDoc(collection(getFirestore(), 'test'), { content: 'aaa' })" },
+      {
+        code: "addDoc(collection(getFirestore(), 'test'), { content: 'aaa' })",
+      },
       { code: "collection().doc().create({ name: 'test' })" },
 
       // Variables with known values (not undefined)
       { code: "const data = { name: 'test' }; doc().set(data)" },
 
       // Conditional that filters out undefined
-      { code: "const value = someValue !== undefined ? someValue : 'default'; doc().set({ value })" },
+      {
+        code: "const value = someValue !== undefined ? someValue : 'default'; doc().set({ value })",
+      },
 
       // Batch operations with valid values (without options)
-      { code: "batch.set({ name: 'test' })" },
-      { code: "batch.update({ name: 'test' })" },
-      { code: "batch.create({ name: 'test' })" },
+      { code: "batch.set(objectRef,{ name: 'test' })" },
+      { code: "batch.update(objectRef,{ name: 'test' })" },
+      { code: "batch.create(objectRef,{ name: 'test' })" },
 
       // Batch operations with valid values (with options)
       {
-        code: "batch.set({ name: 'test' })",
+        code: "batch.set(objectRef,{ name: 'test' })",
         options: [{ additionalObjects: ["batch"] }],
       },
       {
-        code: "batch.update({ name: 'test' })",
+        code: "batch.update(objectRef,{ name: 'test' })",
         options: [{ additionalObjects: ["batch"] }],
       },
       {
-        code: "batch.create({ name: 'test' })",
+        code: "batch.create(objectRef,{ name: 'test' })",
         options: [{ additionalObjects: ["batch"] }],
       },
 
@@ -110,17 +114,17 @@ tester.run(
 
       // Batch operations with undefined (with options)
       {
-        code: "batch.set({ name: undefined })",
+        code: "batch.set(objectRef,{ name: undefined })",
         options: [{ additionalObjects: ["batch"] }],
         errors: [{ messageId: "noUndefinedValues" }],
       },
       {
-        code: "batch.update({ name: undefined })",
+        code: "batch.update(objectRef,{ name: undefined })",
         options: [{ additionalObjects: ["batch"] }],
         errors: [{ messageId: "noUndefinedValues" }],
       },
       {
-        code: "batch.create({ name: undefined })",
+        code: "batch.create(objectRef,{ name: undefined })",
         options: [{ additionalObjects: ["batch"] }],
         errors: [{ messageId: "noUndefinedValues" }],
       },
