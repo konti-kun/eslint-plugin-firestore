@@ -44,14 +44,17 @@ module.exports = (0, createRule_1.createRule)({
                 if (!["set", "update", "create"].includes(propertyName || "")) {
                     return false;
                 }
+                const object = callee.object;
                 if (additionalObjects.length > 0) {
-                    const object = callee.object;
                     if (object.type === "Identifier") {
                         return additionalObjects.includes(object.name);
                     }
+                    return false;
+                }
+                if (object.type === "CallExpression") {
                     return true;
                 }
-                return true;
+                return false;
             }
             return false;
         }
@@ -60,6 +63,15 @@ module.exports = (0, createRule_1.createRule)({
             if (callee.type === "Identifier" &&
                 (callee.name === "setDoc" || callee.name === "updateDoc" || callee.name === "addDoc")) {
                 return 1;
+            }
+            if (callee.type === "MemberExpression") {
+                const object = callee.object;
+                if (object.type === "Identifier" && additionalObjects.includes(object.name)) {
+                    return node.arguments.length >= 2 ? 1 : 0;
+                }
+                if (object.type === "CallExpression") {
+                    return 0;
+                }
             }
             return 0;
         }
