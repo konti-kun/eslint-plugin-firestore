@@ -7,7 +7,11 @@ const messages = {
     "Firestore does not support undefined values in set(), update(), or create() operations. Use null instead or remove the field.",
 };
 
-module.exports = createRule({
+type RuleOptions = {
+  additionalObjects?: string[];
+};
+
+module.exports = createRule<[RuleOptions?], "noUndefinedValues">({
   name: "firestore-no-undefined-values",
   meta: {
     docs: {
@@ -17,10 +21,27 @@ module.exports = createRule({
     },
     type: "problem",
     messages,
-    schema: [],
+    schema: [
+      {
+        type: "object",
+        properties: {
+          additionalObjects: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+            description:
+              "Additional object names (e.g., 'batch', 'transaction') to check for set(), update(), and create() methods",
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
-  defaultOptions: [],
+  defaultOptions: [{}],
   create(context) {
+    const options = context.options[0] || {};
+    const additionalObjects = options.additionalObjects || [];
     // Check if the function is one of: set, setDoc, update, updateDoc, addDoc, create
     function isFirestoreWriteOperation(node: TSESTree.CallExpression): boolean {
       const callee = node.callee as any;
@@ -31,9 +52,25 @@ module.exports = createRule({
       }
 
       // Check for method calls: doc().set(), doc().update(), doc().create()
+      // or custom objects like batch.set(), transaction.update()
       if (callee.type === "MemberExpression") {
         const propertyName = getPropertyName(callee);
-        return ["set", "update", "create"].includes(propertyName || "");
+        if (!["set", "update", "create"].includes(propertyName || "")) {
+          return false;
+        }
+
+        // If additionalObjects is specified, check if the object matches
+        if (additionalObjects.length > 0) {
+          const object = callee.object;
+          if (object.type === "Identifier") {
+            return additionalObjects.includes(object.name);
+          }
+          // Also support chained calls like doc().set()
+          return true;
+        }
+
+        // Default behavior: allow all method calls with set/update/create
+        return true;
       }
 
       return false;
