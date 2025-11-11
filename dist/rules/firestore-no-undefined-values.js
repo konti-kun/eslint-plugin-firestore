@@ -14,10 +14,26 @@ module.exports = (0, createRule_1.createRule)({
         },
         type: "problem",
         messages,
-        schema: [],
+        schema: [
+            {
+                type: "object",
+                properties: {
+                    additionalObjects: {
+                        type: "array",
+                        items: {
+                            type: "string",
+                        },
+                        description: "Additional object names (e.g., 'batch', 'transaction') to check for set(), update(), and create() methods",
+                    },
+                },
+                additionalProperties: false,
+            },
+        ],
     },
-    defaultOptions: [],
+    defaultOptions: [{}],
     create(context) {
+        const options = context.options[0] || {};
+        const additionalObjects = options.additionalObjects || [];
         function isFirestoreWriteOperation(node) {
             const callee = node.callee;
             if (callee.type === "Identifier") {
@@ -25,7 +41,17 @@ module.exports = (0, createRule_1.createRule)({
             }
             if (callee.type === "MemberExpression") {
                 const propertyName = (0, eslint_ast_utils_1.getPropertyName)(callee);
-                return ["set", "update", "create"].includes(propertyName || "");
+                if (!["set", "update", "create"].includes(propertyName || "")) {
+                    return false;
+                }
+                if (additionalObjects.length > 0) {
+                    const object = callee.object;
+                    if (object.type === "Identifier") {
+                        return additionalObjects.includes(object.name);
+                    }
+                    return true;
+                }
+                return true;
             }
             return false;
         }
